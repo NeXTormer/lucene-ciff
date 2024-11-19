@@ -29,4 +29,9 @@ public class CiffNormsProducer extends NormsProducer {
 
     @Override
     public void close() {}
+
+    @Override
+    public long ramBytesUsed() {
+        return 0;
+    }
 }

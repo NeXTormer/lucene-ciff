@@ -2,6 +2,7 @@ package nl.ru.ciffimporter;
 
 import org.apache.lucene.codecs.*;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.*;
 import org.apache.lucene.store.FSDirectory;
@@ -43,9 +44,6 @@ public class CiffImporter {
             0,
             0,
             0,
-            0,
-            VectorEncoding.FLOAT32,
-            VectorSimilarityFunction.EUCLIDEAN,
             false
     );
 
@@ -62,9 +60,9 @@ public class CiffImporter {
             0,
             0,
             0,
-            0,
-            VectorEncoding.FLOAT32,
-            VectorSimilarityFunction.EUCLIDEAN,
+//            0,
+//            VectorEncoding.FLOAT32,
+//            VectorSimilarityFunction.EUCLIDEAN,
             false
     );
 
@@ -175,17 +173,21 @@ public class CiffImporter {
         try (CiffReader reader = new CiffReader(this.inputFile, true);
                 StoredFieldsWriter writer = codec.storedFieldsFormat().fieldsWriter(outputDirectory, segmentInfo, writeContext)) {
             Iterator<DocRecord> docRecords = reader.getDocRecords();
+
             while (docRecords.hasNext()) {
                 DocRecord doc = docRecords.next();
 
                 writer.startDocument();
                 writer.writeField(ID_FIELD_INFO, new StringField(ID, doc.getCollectionDocid(), Field.Store.YES));
+
                 writer.finishDocument();
             }
-
-            writer.finish(header.getNumDocs());
+            //TODO: Changed
+            writer.finish(new FieldInfos(new FieldInfo[]{ID_FIELD_INFO}), header.getNumDocs());
+            writer.close();
         }
     }
+
 
     private void writeDocValues() throws IOException {
         try (DocValuesConsumer consumer = codec.docValuesFormat().fieldsConsumer(writeState)) {
